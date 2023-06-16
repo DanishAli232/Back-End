@@ -3,7 +3,8 @@ import Chat from "../Models/ChatModel.js";
 const users = [];
 
 const addUser = async ({ id, chatData }) => {
-  let { user1Id, user2Id } = chatData;
+  let { user1Id, user2Id, user1name, user1contact, user2name, user2contact } =
+    chatData;
   if (!user1Id || !user2Id)
     return { error: "sender and receiver ID are required." };
   let existingUser = await Chat.findOne({
@@ -71,6 +72,55 @@ const saveMessage = async (id) => {
   }
 
   return data0;
+};
+
+export const lockChat = async (req, res) => {
+  const { chatId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (chat.lockedBy) {
+      return res.status(400).json({ message: "Chat is already locked" });
+    }
+
+    chat.lockedBy = userId;
+    await chat.save();
+
+    return res.status(200).json({ message: "Chat locked successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const unlockChat = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (!chat.lockedBy) {
+      return res.status(400).json({ message: "Chat is already unlocked" });
+    }
+
+    chat.lockedBy = null;
+    await chat.save();
+
+    return res.status(200).json({ message: "Chat unlocked successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export { addUser, saveMessage };

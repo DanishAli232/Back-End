@@ -20,6 +20,11 @@ const ChatSchema = new mongoose.Schema(
       contact: { type: String },
     },
     chat: [{ text: { type: String }, sender: { type: String } }],
+    lockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   {
     timestamps: true,
