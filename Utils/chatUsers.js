@@ -7,19 +7,20 @@ const addUser = async ({ id, chatData }) => {
     chatData;
   if (!user1Id || !user2Id)
     return { error: "sender and receiver ID are required." };
+
   let existingUser = await Chat.findOne({
     "user1.userid": user1Id,
     "user2.userId": user2Id,
   });
   if (existingUser) {
-    return existingUser;
+    return { user: existingUser, error: "" };
   }
   let existingUser0 = await Chat.findOne({
     "user2.userid": user1Id,
     "user1.userId": user2Id,
   });
   if (existingUser0) {
-    return existingUser0;
+    return { user: existingUser0, error: "" };
   }
 
   let data = await Chat.create({
@@ -35,7 +36,7 @@ const addUser = async ({ id, chatData }) => {
     },
     chat: [],
   });
-  return data;
+  return { user: data, error: "" };
 };
 
 const saveMessage = async (id) => {

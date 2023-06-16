@@ -27,15 +27,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (message, callback) => {
-    const { user, error } = saveMessage(message);
-    if (error) {
-      return callback(error);
-    }
+    if (user.lockedBy === null) {
+      const { user, error } = saveMessage(message);
+      if (error) {
+        return callback(error);
+      }
 
-    io.to(`${message.sender}_${message.receiver}`).emit("message", {
-      user: message.name,
-      text: message.message,
-    });
+      io.to(`${message.user1ID}_${message.user2ID}`).emit("message", {
+        user: message.name,
+        text: message.message,
+      });
+    }
   });
 
   socket.on("disconnect", () => {
