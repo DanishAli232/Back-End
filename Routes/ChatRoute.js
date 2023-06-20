@@ -1,12 +1,9 @@
-// import express from "express";
-// import {
-//   chatCustomer,
-//   chatCustomerUsers,
-// } from "../Controllers/ChatController.js";
+import express from "express";
+import { lockChat, unlockChat } from "../Controllers/ChatController.js";
 
-// var ChatRouter = express.Router();
+var ChatRouter = express.Router();
 
-// ChatRouter.get("/chatcustomers/:id", chatCustomer);
-// ChatRouter.get("/chatcustomersusers/:id/:vid", chatCustomerUsers);
+ChatRouter.get("/lockChat/:chatId/:userId", lockChat);
+ChatRouter.get("/unlockChat/:chatId", unlockChat);
 
-// export default ChatRouter;
+export default ChatRouter;

@@ -19,11 +19,16 @@ const ChatSchema = new mongoose.Schema(
       name: { type: String },
       contact: { type: String },
     },
+
     chat: [{ text: { type: String }, sender: { type: String } }],
+
     lockedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
+    },
+    roomID: {
+      type: String,
     },
   },
   {

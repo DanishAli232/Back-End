@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 // import config from "../Utils/config.js";
 
 mongoose.set("strictQuery", false);
-import { addUser, saveMessage } from "../Utils/chatUsers.js";
+import { addUser, findUser, saveMessage } from "../Utils/chatUsers.js";
 
 var port = normalizePort(process.env.PORT || "5000");
 app.set("port", port);
@@ -17,23 +17,44 @@ const io = new Server(server);
 
 io.on("connection", (socket) => {
   socket.on("join", (chatData, callback) => {
-    const { error, user } = addUser({ id: socket.id, chatData });
-    if (error) return callback(error);
     let { user1ID, user2ID } = chatData;
-    const roomId = `${user1ID}_${user2ID}`;
-    socket.join(roomId);
-    console.log(`User1 ${user1ID} and User2 ${user2ID} joined room ${roomId}`);
-    callback();
+    const { user, error } = findUser({ id: socket.id, chatData });
+    if (error) return callback(error);
+    if (Object.keys(user).length === 0) {
+      const { success, error } = addUser({ id: socket.id, chatData });
+      if (success) {
+        const roomId = `${user1ID}_${user2ID}`;
+        socket.join(roomId);
+        console.log(
+          `User1 ${user1ID} and User2 ${user2ID} joined room ${roomId}`
+        );
+        callback(user);
+      } else {
+        callback(error);
+      }
+    } else {
+      socket.join(user.roomID);
+      console.log(
+        `User1 ${user1ID} and User2 ${user2ID} joined room ${user.roomID}`
+      );
+      callback(user);
+    }
   });
 
   socket.on("sendMessage", (message, callback) => {
-    if (user.lockedBy === null) {
-      const { user, error } = saveMessage(message);
-      if (error) {
-        return callback(error);
+    const { error, user } = findUser({ id: socket.id, chatData });
+    if (error) {
+      return callback(error);
+    }
+    if (user.lockedBy) {
+      return callback("Sorry! Chat has been Locked");
+    } else {
+      const { user0, error0 } = saveMessage(message, user);
+      if (error0) {
+        return callback(error0);
       }
 
-      io.to(`${message.user1ID}_${message.user2ID}`).emit("message", {
+      io.to(user.roomID).emit("message", {
         user: message.name,
         text: message.message,
       });
