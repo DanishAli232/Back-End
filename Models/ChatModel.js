@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const ChatSchema = new mongoose.Schema(
   {
     user1: {
-      userId: {
+      id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
@@ -12,7 +12,7 @@ const ChatSchema = new mongoose.Schema(
     },
 
     user2: {
-      userId: {
+      id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },

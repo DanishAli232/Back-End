@@ -3,49 +3,47 @@ import Chat from "../Models/ChatModel.js";
 const users = [];
 
 const findUser = async ({ id, chatData }) => {
-  let { user1Id, user2Id } = chatData;
-  if (!user1Id || !user2Id)
+  let { user1, user2 } = chatData;
+  if (!user1.id || !user2.id)
     return { user: {}, error: "sender and receiver ID are required." };
 
   let existingUser = await Chat.findOne({
-    roomID: `${user1Id}_${user2Id}`,
-  });
-
+    roomID: `${user1.id}_${user2.id}`,
+  }).exec();
   if (existingUser) {
     return { user: existingUser, error: "" };
   }
 
   let existingUser0 = await Chat.findOne({
-    roomID: `${user2Id}_${user1Id}`,
-  });
+    roomID: `${user2.id}_${user1.id}`,
+  }).exec();
 
   if (existingUser0) {
     return { user: existingUser0, error: "" };
   } else {
     return {
       user: {},
-      error: "No User Found",
+      error: "",
     };
   }
 };
 
 const addUser = async ({ id, chatData }) => {
-  let { user1Id, user2Id, user1name, user1contact, user2name, user2contact } =
-    chatData;
+  let { user1, user2 } = chatData;
   try {
     let data = await Chat.create({
       user1: {
-        userId: user1Id,
-        name: user1name,
-        contact: user1contact,
+        id: user1.id,
+        name: user1.name,
+        contact: user1.contact,
       },
       user2: {
-        userId: user2Id,
-        name: user2name,
-        contact: user2contact,
+        id: user2.id,
+        name: user2.name,
+        contact: user2.contact,
       },
       chat: [],
-      roomID: `${user2Id}_${user1Id}`,
+      roomID: `${user1.id}_${user2.id}`,
     });
 
     return { success: true, error: "" };
@@ -58,14 +56,10 @@ const saveMessage = async (id, user) => {
   let data0 = {};
 
   try {
-    let query1 = {
-      user1: id.user1,
-      user2: id.user2,
-    };
     let data1 = await Chat.updateOne(
       { roomID: user.roomID },
       {
-        $push: { chat: { text: id.message, sender: id.name } },
+        $push: { chat: { text: id.text, sender: id.name } },
       }
     );
 

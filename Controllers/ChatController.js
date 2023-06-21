@@ -1,4 +1,4 @@
-import Chat from "../Models/ChatModel";
+import Chat from "../Models/ChatModel.js";
 
 export const lockChat = async (req, res) => {
   const { chatId, userId } = req.params;
@@ -10,7 +10,7 @@ export const lockChat = async (req, res) => {
       return res.status(500).json({ message: "Chat not found" });
     }
 
-    if (chat.lockedBy) {
+    if (chat?.lockedBy) {
       return res.status(500).json({ message: "Chat is already locked" });
     }
 
@@ -38,10 +38,10 @@ export const unlockChat = async (req, res) => {
       return res.status(500).json({ message: "Chat not found" });
     }
 
-    if (!chat.lockedBy) {
+    if (!chat?.lockedBy) {
       return res.status(500).json({ message: "Chat is already unlocked" });
     }
-    if (chat.lockedBy === userId) {
+    if (chat?.lockedBy == userId) {
       chat.lockedBy = null;
       try {
         await chat.save();
